@@ -34,6 +34,8 @@ const selectors = {
   editUrlButton: '[data-testid="account-page-edit-url-btn"]',
   editPasswordButton: '[data-testid="account-page-edit-password-btn"]',
   logoutButton: '[data-testid="account-page-logout-url-btn"]',
+  softwareLicenseLink: '[data-testid="account-page-software-license-link"]',
+  helpPageLink: '[data-testid="account-page-help-page-link"]',
   accountPageInfo: '.account-page-info',
   groupNames: '[data-testid="group-names"]',
   groupNamesEmpty: '[data-testid="group-names-empty"]',
@@ -74,6 +76,44 @@ describe('account page', () => {
 
         const editUrlButton = wrapper.find(selectors.editUrlButton)
         expect(editUrlButton.exists()).toBeFalsy()
+      })
+    })
+    describe('software license link', () => {
+      it('should be displayed if defined via config', async () => {
+        const { wrapper } = getWrapper({
+          softwareLicenseUrl: 'https://example.com/license'
+        })
+        await blockLoadingState(wrapper)
+
+        const link = wrapper.find(selectors.softwareLicenseLink)
+        expect(link.exists()).toBeTruthy()
+        expect(link.attributes('href')).toEqual('https://example.com/license')
+      })
+      it('should not be displayed if not defined via config', async () => {
+        const { wrapper } = getWrapper()
+        await blockLoadingState(wrapper)
+
+        const link = wrapper.find(selectors.softwareLicenseLink)
+        expect(link.exists()).toBeFalsy()
+      })
+    })
+    describe('help page link', () => {
+      it('should be displayed if defined via config', async () => {
+        const { wrapper } = getWrapper({
+          helpPageUrl: 'https://example.com/help'
+        })
+        await blockLoadingState(wrapper)
+
+        const link = wrapper.find(selectors.helpPageLink)
+        expect(link.exists()).toBeTruthy()
+        expect(link.attributes('href')).toEqual('https://example.com/help')
+      })
+      it('should not be displayed if not defined via config', async () => {
+        const { wrapper } = getWrapper()
+        await blockLoadingState(wrapper)
+
+        const link = wrapper.find(selectors.helpPageLink)
+        expect(link.exists()).toBeFalsy()
       })
     })
   })
@@ -423,6 +463,8 @@ function getWrapper({
   user = mock<User>({ memberOf: [] }),
   capabilities = {},
   accountEditLink = undefined,
+  softwareLicenseUrl = undefined,
+  helpPageUrl = undefined,
   spaces = [],
   isPublicLinkContext = false,
   isUserContext = true,
@@ -432,6 +474,8 @@ function getWrapper({
   user?: User
   capabilities?: Partial<Capabilities['capabilities']>
   accountEditLink?: OptionsConfig['accountEditLink']
+  softwareLicenseUrl?: string
+  helpPageUrl?: string
   spaces?: SpaceResource[]
   isPublicLinkContext?: boolean
   isUserContext?: boolean
@@ -451,6 +495,16 @@ function getWrapper({
         options: {
           logoutUrl: 'https://account-manager/logout',
           ...(accountEditLink && { accountEditLink })
+        }
+      },
+      themeState: {
+        currentTheme: {
+          common: {
+            urls: {
+              softwareLicense: softwareLicenseUrl,
+              helpPage: helpPageUrl
+            }
+          }
         }
       }
     }
